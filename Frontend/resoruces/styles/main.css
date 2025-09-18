@@ -1,0 +1,22 @@
+/*
+  FitTrack Stylesheet (resoruces/styles/main.css)
+  Minimal custom CSS; prefer Bootstrap utilities. Keep components lightweight.
+*/
+
+body {
+  background-color: #f8f9fa;
+}
+
+.navbar-brand {
+  font-weight: 600;
+}
+
+.streak-badge {
+  font-size: 0.95rem;
+}
+
+.workout-card.done {
+  border-color: #198754;
+}
+
+
