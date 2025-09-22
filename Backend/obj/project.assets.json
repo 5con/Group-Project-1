@@ -6593,19 +6593,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\dylan\\.nuget\\packages\\": {}
+    "C:\\Users\\Connor\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\dylan\\Documents\\Source Fall 2025\\Group-Project-1-main\\Backend\\Backend.csproj",
+      "projectUniqueName": "C:\\Users\\Connor\\Desktop\\School\\MIS - 321\\Group-Project-1\\Backend\\Backend.csproj",
       "projectName": "Backend",
-      "projectPath": "C:\\Users\\dylan\\Documents\\Source Fall 2025\\Group-Project-1-main\\Backend\\Backend.csproj",
-      "packagesPath": "C:\\Users\\dylan\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\dylan\\Documents\\Source Fall 2025\\Group-Project-1-main\\Backend\\obj\\",
+      "projectPath": "C:\\Users\\Connor\\Desktop\\School\\MIS - 321\\Group-Project-1\\Backend\\Backend.csproj",
+      "packagesPath": "C:\\Users\\Connor\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Connor\\Desktop\\School\\MIS - 321\\Group-Project-1\\Backend\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\dylan\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Connor\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
@@ -6673,7 +6673,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.101/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
