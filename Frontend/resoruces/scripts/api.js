@@ -1,17 +1,61 @@
 ;(function () {
-  const base = () => (window.AppConfig && window.AppConfig.API_BASE_URL) || ''
+  const base = () => {
+    const url = (window.AppConfig && window.AppConfig.API_BASE_URL) || 'http://localhost:5226'
+    if (!url) {
+      console.warn('API_BASE_URL not configured')
+    }
+    return url
+  }
 
   async function http(path, opts) {
-    const res = await fetch(`${base()}${path}`, {
+    const url = `${base()}${path}`
+    console.log('Making API request to:', url, opts)
+
+    const res = await fetch(url, {
       headers: { 'Content-Type': 'application/json' },
       ...opts,
     })
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+
+    console.log('Raw response:', res)
+    console.log('Response type:', typeof res)
+    console.log('Response ok:', res?.ok)
+    console.log('Response status:', res?.status)
+    console.log('Response statusText:', res?.statusText)
+
+    if (!res) {
+      throw new Error('No response received from server')
+    }
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status || 'unknown'}: ${res.statusText || 'unknown error'}`)
+    }
     const ct = res.headers.get('content-type') || ''
-    return ct.includes('application/json') ? res.json() : res.text()
+    console.log('Content type:', ct)
+
+    let result
+    if (ct.includes('application/json')) {
+      result = await res.json()
+    } else {
+      result = await res.text()
+    }
+    console.log('Parsed result:', result)
+    return result
   }
 
   const Api = {
+    async register(userData) {
+      return http('/api/users/register', {
+        method: 'POST',
+        body: JSON.stringify(userData)
+      })
+    },
+
+    async login(credentials) {
+      return http('/api/users/login', {
+        method: 'POST',
+        body: JSON.stringify(credentials)
+      })
+    },
+
     async upsertUserFromProfile(email, profile) {
       // find existing by email
       const found = await http(`/api/users?email=${encodeURIComponent(email)}`)
@@ -66,6 +110,7 @@
   }
 
   window.Api = Api
+  window.AppAPI = Api
 })()
 
 

@@ -1,23 +1,86 @@
 using Backend.Models;
+using System.Security.Cryptography;
 
 namespace Backend.Services
 {
+    public class AuthService
+    {
+        private readonly PlanService _planService;
+
+        public AuthService(PlanService planService)
+        {
+            _planService = planService;
+        }
+
+        public string HashPassword(string password) => _planService.HashPassword(password);
+        public bool VerifyPassword(string password, string hashedPassword) => _planService.VerifyPassword(password, hashedPassword);
+    }
+
     public class PlanService
     {
+        public string HashPassword(string password)
+        {
+            // Generate a random salt
+            byte[] salt = new byte[16];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(salt);
+            }
+
+            // Hash the password with the salt
+            using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 10000, HashAlgorithmName.SHA256))
+            {
+                byte[] hash = pbkdf2.GetBytes(32);
+
+                // Combine salt and hash
+                byte[] hashBytes = new byte[48];
+                Array.Copy(salt, 0, hashBytes, 0, 16);
+                Array.Copy(hash, 0, hashBytes, 16, 32);
+
+                // Convert to base64 string
+                return Convert.ToBase64String(hashBytes);
+            }
+        }
+
+        public bool VerifyPassword(string password, string hashedPassword)
+        {
+            // Convert base64 string back to bytes
+            byte[] hashBytes = Convert.FromBase64String(hashedPassword);
+
+            // Extract salt and hash from the stored string
+            byte[] salt = new byte[16];
+            byte[] hash = new byte[32];
+            Array.Copy(hashBytes, 0, salt, 0, 16);
+            Array.Copy(hashBytes, 16, hash, 0, 32);
+
+            // Hash the provided password with the same salt
+            using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 10000, HashAlgorithmName.SHA256))
+            {
+                byte[] hashAttempt = pbkdf2.GetBytes(32);
+
+                // Compare the hashes
+                for (int i = 0; i < 32; i++)
+                {
+                    if (hash[i] != hashAttempt[i])
+                        return false;
+                }
+                return true;
+            }
+        }
         public (IEnumerable<PlanDay> days, object advice) GenerateWeeklyPlan(User user, DateOnly weekStart)
         {
             var plan = new List<PlanDay>();
             var sport = (user.Sport ?? "generic").ToLowerInvariant();
             var level = (user.Level ?? "beginner").ToLowerInvariant();
             var position = user.Position;
-            
+
             for (int i = 0; i < 7; i++)
             {
                 var date = weekStart.AddDays(i);
-                var (type, workout) = sport == "football" 
+                var (type, workout) = sport == "football"
                     ? GetFootballWorkout(position, level, i)
                     : SuggestWorkout(sport, level, i);
-                    
+
                 plan.Add(new PlanDay
                 {
                     Date = date,
@@ -80,7 +143,7 @@ namespace Backend.Services
         public object GetPositionSpecificDietTips(string sport, string? position)
         {
             if (sport?.ToLowerInvariant() != "football" || string.IsNullOrEmpty(position))
-                return GetDietTips(sport);
+                return GetDietTips(sport ?? "generic");
 
             return position.ToLowerInvariant() switch
             {
@@ -169,7 +232,7 @@ namespace Backend.Services
         {
             var pos = (position ?? "generic").ToLowerInvariant();
             var isRest = (dayIndex == 3 || dayIndex == 6) && level == "beginner";
-            
+
             if (isRest) return ("rest", "Active recovery: 20 min walk + mobility work");
 
             return pos switch

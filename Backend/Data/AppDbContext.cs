@@ -18,9 +18,12 @@ namespace Backend.Data
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Email).IsRequired();
-                entity.Property(e => e.Sport).IsRequired(false);
-                entity.Property(e => e.Level).IsRequired(false);
+                entity.Property(e => e.Password).IsRequired();
+                entity.Property(e => e.Sport).IsRequired();
+                entity.Property(e => e.Level).IsRequired();
+                entity.Property(e => e.Position); // Configure Position property
                 entity.Property(e => e.CreatedAtUtc).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.HasIndex(e => e.Email).IsUnique();
             });
 
             modelBuilder.Entity<PlanDay>(entity =>
@@ -29,6 +32,10 @@ namespace Backend.Data
                 entity.Property(e => e.DayName).IsRequired();
                 entity.Property(e => e.Workout).IsRequired();
                 entity.Property(e => e.Type).IsRequired();
+                entity.Property(e => e.Date).HasConversion(
+                    d => d.ToDateTime(TimeOnly.MinValue),
+                    d => DateOnly.FromDateTime(d)
+                );
                 entity.HasOne<User>()
                     .WithMany()
                     .HasForeignKey(e => e.UserId)
