@@ -10,17 +10,54 @@
     document.getElementById('weight').value = profile.weight
     document.getElementById('sport').value = profile.sport
     document.getElementById('level').value = profile.level
+    
+    // Handle position field for football
+    const positionField = document.getElementById('positionField')
+    const positionSelect = document.getElementById('position')
+    const sportSelect = document.getElementById('sport')
+    
+    if (profile.sport === 'Football' && profile.position) {
+      positionField.style.display = 'block'
+      positionSelect.value = profile.position
+      positionSelect.required = true
+    } else {
+      positionField.style.display = 'none'
+      positionSelect.required = false
+    }
   }
 
   function bindForm() {
     const form = document.getElementById('settingsForm')
+    const sportSelect = document.getElementById('sport')
+    const positionField = document.getElementById('positionField')
+    const positionSelect = document.getElementById('position')
+    
+    // Show/hide position field based on sport selection
+    sportSelect.addEventListener('change', function() {
+      if (this.value === 'Football') {
+        positionField.style.display = 'block'
+        positionSelect.required = true
+      } else {
+        positionField.style.display = 'none'
+        positionSelect.required = false
+        positionSelect.value = ''
+      }
+    })
+    
     form.addEventListener('submit', function (e) {
       e.preventDefault()
       const height = parseInt(document.getElementById('height').value, 10)
       const weight = parseInt(document.getElementById('weight').value, 10)
       const sport = document.getElementById('sport').value
       const level = document.getElementById('level').value
-      const profile = { height, weight, sport, level }
+      const position = document.getElementById('position').value
+      
+      if (sport === 'Football' && !position) {
+        alert('Please select a position for football.')
+        return
+      }
+      
+      const profile = { height, weight, sport, level, position }
       window.AppStorage.setProfile(profile)
       const start = window.AppStorage.startOfWeek(new Date())
       const key = window.AppStorage.getWeekKey(start)

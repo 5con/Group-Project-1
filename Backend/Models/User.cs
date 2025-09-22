@@ -8,6 +8,7 @@ namespace Backend.Models
         public double? WeightKg { get; set; }
         public string? Sport { get; set; }
         public string? Level { get; set; } // beginner, intermediate, advanced
+        public string? Position { get; set; } // For football: QB, RB, WR, TE, OL, DL, LB, CB, S, K, P
         public DateTime CreatedAtUtc { get; set; }
     }
 }

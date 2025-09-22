@@ -53,10 +53,21 @@
               </div>
             </div>
           </div>
+          
+          <!-- Position-Specific Dashboard -->
+          <div id="positionDashboard" class="card shadow-sm mb-3" style="display: none;">
+            <div class="card-body">
+              <h3 class="h6 mb-3">Position Metrics</h3>
+              <div id="positionMetrics"></div>
+            </div>
+          </div>
+          
           <div class="card shadow-sm">
             <div class="card-body">
               <h3 class="h6">Nutrition & Tips</h3>
-              <p class="mb-0" id="dietTips">Eat whole foods, hydrate, and sleep well.</p>
+              <div id="nutritionContent">
+                <p class="mb-0" id="dietTips">Eat whole foods, hydrate, and sleep well.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -93,6 +104,16 @@
                     <option>Golf</option>
                   </select>
                 </div>
+                <div class="col-12" id="positionField" style="display: none;">
+                  <label class="form-label" for="position">Position</label>
+                  <select class="form-select" id="position">
+                    <option value="" selected disabled>Select position</option>
+                    <option value="QB">Quarterback</option>
+                    <option value="WR">Wide Receiver</option>
+                    <option value="LB">Linebacker</option>
+                    <option value="CB">Cornerback</option>
+                  </select>
+                </div>
                 <div class="col-12">
                   <label class="form-label" for="level">Fitness level</label>
                   <select class="form-select" id="level" required>
@@ -108,6 +129,25 @@
               <button type="submit" class="btn btn-primary">Save</button>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed Day Modal -->
+    <div class="modal fade" id="dayDetailModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="dayDetailTitle">Workout Details</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div id="dayDetailContent"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="markCompleteBtn">Mark Complete</button>
+          </div>
         </div>
       </div>
     </div>

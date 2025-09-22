@@ -27,6 +27,7 @@
             weightKg: profile.weight,
             sport: profile.sport,
             level: profile.level,
+            position: profile.position,
           }),
         })
         return u
@@ -40,6 +41,7 @@
           weightKg: profile.weight,
           sport: profile.sport,
           level: profile.level,
+          position: profile.position,
         }),
       })
       return created
@@ -55,7 +57,10 @@
       return http(`/api/users/${userId}/plans${qs}`)
     },
 
-    async getTips(sport) {
+    async getTips(sport, position = null) {
+      if (position) {
+        return http(`/api/tips/${encodeURIComponent(sport)}/${encodeURIComponent(position)}`)
+      }
       return http(`/api/tips/${encodeURIComponent(sport)}`)
     },
   }

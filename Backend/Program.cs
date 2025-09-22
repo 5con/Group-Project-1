@@ -82,6 +82,7 @@ users.MapPut("/{id:int}", async Task<Results<NoContent, NotFound>> (int id, Back
     existing.WeightKg = updated.WeightKg;
     existing.Sport = updated.Sport;
     existing.Level = updated.Level;
+    existing.Position = updated.Position;
     await db.SaveChangesAsync();
     return TypedResults.NoContent();
 });
@@ -135,5 +136,6 @@ users.MapPost("/{id:int}/plans/generate", async (int id, DateOnly? weekStart, Ap
 
 // Tips
 app.MapGet("/api/tips/{sport}", (string sport, PlanService planner) => Results.Ok(planner.GetDietTips(sport)));
+app.MapGet("/api/tips/{sport}/{position}", (string sport, string position, PlanService planner) => Results.Ok(planner.GetPositionSpecificDietTips(sport, position)));
 
 app.Run();

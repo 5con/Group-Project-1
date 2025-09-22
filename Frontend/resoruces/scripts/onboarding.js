@@ -17,10 +17,18 @@
     Golf: { name: 'Tiger Woods', img: './resoruces/images/athlete-golf.svg' },
   }
 
+  // Position-specific football athletes
+  const FOOTBALL_ATHLETES = {
+    'QB': { name: 'Patrick Mahomes', img: './resoruces/images/athlete-qb.jpg.jpg' },
+    'WR': { name: 'Justin Jefferson', img: './resoruces/images/athlete-wr.jpg.jpg' },
+    'LB': { name: 'Fred Warner', img: './resoruces/images/athlete-lb.jpg.webp' },
+    'CB': { name: 'Patrick Surtain', img: './resoruces/images/athlete-cb.jpg.jpg' },
+  }
+
   const DIET_TIPS = {
     Baseball: 'Lean protein, shoulder health, steady carbs.',
     Basketball: 'Hydrate; complex carbs + recovery protein.',
-    Football: 'High-protein, balanced fats; carb timing around training.',
+    Football: 'Protein: 1.6-2.0 g/kg/day • Carbs: 5-7 g/kg/day • Hydration: 3-5 L/day',
     Tennis: 'Frequent small meals; electrolytes; quick match fuel.',
     Golf: 'Light steady energy; hydration; posture-support nutrients.',
   }
@@ -116,16 +124,35 @@
   function bindOnboardingForm() {
     const form = document.getElementById('onboardingForm')
     if (!form) return
+    
+    // Show/hide position field based on sport selection
+    const sportSelect = document.getElementById('sport')
+    const positionField = document.getElementById('positionField')
+    const positionSelect = document.getElementById('position')
+    
+    sportSelect.addEventListener('change', function() {
+      if (this.value === 'Football') {
+        positionField.style.display = 'block'
+        positionSelect.required = true
+      } else {
+        positionField.style.display = 'none'
+        positionSelect.required = false
+        positionSelect.value = ''
+      }
+    })
+    
     form.addEventListener('submit', async function (e) {
       e.preventDefault()
       const height = parseInt(document.getElementById('height').value, 10)
       const weight = parseInt(document.getElementById('weight').value, 10)
       const sport = document.getElementById('sport').value
       const level = document.getElementById('level').value
+      const position = document.getElementById('position').value
       if (!height || !weight || !sport || !level) return
+      if (sport === 'Football' && !position) return
       const auth = window.AppStorage.isAuthenticated() ? JSON.parse(localStorage.getItem('ft_auth_v1')) : null
       const email = auth ? auth.email : null
-      const profile = { height, weight, sport, level, email }
+      const profile = { height, weight, sport, level, position, email }
       window.AppStorage.setProfile(profile)
       try {
         if (window.AppConfig.USE_BACKEND_WHEN_AVAILABLE && email) {
@@ -153,7 +180,10 @@
     })
   }
 
-  function getStarAthlete(sport) {
+  function getStarAthlete(sport, position = null) {
+    if (sport === 'Football' && position && FOOTBALL_ATHLETES[position]) {
+      return FOOTBALL_ATHLETES[position]
+    }
     return STAR_ATHLETES[sport] || { name: 'Athlete', img: './resoruces/images/athlete-generic.svg' }
   }
 
