@@ -11,7 +11,7 @@ namespace Backend.Models
         public string Sport { get; set; } = string.Empty;
         public string Level { get; set; } = string.Empty; // beginner, intermediate, advanced
         public string? Position { get; set; }
-        // For football: QB, RB, WR, TE, OL, DL, LB, CB, S, K, P
+        // For football: QB, WR, LB, CB
         //
         public DateTime CreatedAtUtc { get; set; }
     }
