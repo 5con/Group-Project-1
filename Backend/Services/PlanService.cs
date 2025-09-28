@@ -119,12 +119,6 @@ namespace Backend.Services
                     "Timing: Carb + protein snack within 60 minutes post-session",
                     "Recovery: Anti-inflammatory foods (turmeric, berries)"
                 },
-                "tennis" => new[]
-                {
-                    "Carbs between sets for quick energy",
-                    "Banana + isotonic drink mid-session",
-                    "Protein within 45 minutes post match"
-                },
                 "golf" => new[]
                 {
                     "Steady hydration every 3 holes",
@@ -192,9 +186,6 @@ namespace Backend.Services
                 "football" => dayIndex % 2 == 0
                     ? ("strength", "Power: cleans, squats, bench; Accessory: rows, hamstrings")
                     : ("conditioning", "Tempo runs, shuttle, agility ladder, sled pushes"),
-                "tennis" => dayIndex % 2 == 0
-                    ? ("skill", "Serve practice, cross-court drills, footwork ladders")
-                    : ("strength", "Upper body pull/push superset + rotational core"),
                 "golf" => dayIndex % 2 == 0
                     ? ("mobility", "T-spine rotation, hip mobility, band work, putting")
                     : ("strength", "Glute bridges, deadlifts light, anti-rotation core"),
