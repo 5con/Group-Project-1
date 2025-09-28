@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\panca\\OneDrive - The University of Alabama\\TheUniversityofAlabama\\Code\\MIS_321\\Group-Project-1\\backend\\Backend.csproj": {}
+    "C:\\Users\\Connor\\Desktop\\School\\MIS - 321\\Group-Project-1\\Backend\\Backend.csproj": {}
   },
   "projects": {
-    "C:\\Users\\panca\\OneDrive - The University of Alabama\\TheUniversityofAlabama\\Code\\MIS_321\\Group-Project-1\\backend\\Backend.csproj": {
+    "C:\\Users\\Connor\\Desktop\\School\\MIS - 321\\Group-Project-1\\Backend\\Backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\panca\\OneDrive - The University of Alabama\\TheUniversityofAlabama\\Code\\MIS_321\\Group-Project-1\\backend\\Backend.csproj",
+        "projectUniqueName": "C:\\Users\\Connor\\Desktop\\School\\MIS - 321\\Group-Project-1\\Backend\\Backend.csproj",
         "projectName": "Backend",
-        "projectPath": "C:\\Users\\panca\\OneDrive - The University of Alabama\\TheUniversityofAlabama\\Code\\MIS_321\\Group-Project-1\\backend\\Backend.csproj",
-        "packagesPath": "C:\\Users\\panca\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\panca\\OneDrive - The University of Alabama\\TheUniversityofAlabama\\Code\\MIS_321\\Group-Project-1\\backend\\obj\\",
+        "projectPath": "C:\\Users\\Connor\\Desktop\\School\\MIS - 321\\Group-Project-1\\Backend\\Backend.csproj",
+        "packagesPath": "C:\\Users\\Connor\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Connor\\Desktop\\School\\MIS - 321\\Group-Project-1\\Backend\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\panca\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\Connor\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -37,7 +37,8 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        }
+        },
+        "SdkAnalysisLevel": "9.0.100"
       },
       "frameworks": {
         "net8.0": {
@@ -77,6 +78,24 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.12, 8.0.12]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.win-x64",
+              "version": "[8.0.12, 8.0.12]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[8.0.12, 8.0.12]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[8.0.12, 8.0.12]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"
@@ -85,7 +104,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.405/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
