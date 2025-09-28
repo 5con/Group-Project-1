@@ -25,7 +25,7 @@
     const diet = window.Onboarding.getDietTip(profile.sport)
     document.getElementById('dietTips').textContent = diet
     
-    // Add position-specific styling to athlete card
+    // Add sport-specific styling to athlete card
     if (profile.sport === 'Football' && profile.position) {
       const athleteCard = document.querySelector('#athleteImg').closest('.card')
       if (athleteCard) {
@@ -34,6 +34,11 @@
       
       // Show position dashboard
       renderPositionDashboard(profile.position)
+    } else if (profile.sport === 'Running') {
+      const athleteCard = document.querySelector('#athleteImg').closest('.card')
+      if (athleteCard) {
+        athleteCard.classList.add('athlete-card', 'running')
+      }
     }
   }
 
@@ -45,6 +50,41 @@
       'CB': '🏃‍♂️'
     }
     return icons[position] || '🏈'
+  }
+
+  function renderRunningWorkout(item, checked) {
+    const workoutTypes = {
+      'strength': { icon: '💪', color: 'primary', title: 'Strength Training' },
+      'skills': { icon: '🏃‍♂️', color: 'success', title: 'Form & Drills' },
+      'conditioning': { icon: '⚡', color: 'info', title: 'Speed Work' },
+      'mobility': { icon: '🧘‍♂️', color: 'warning', title: 'Recovery & Mobility' },
+      'rest': { icon: '😴', color: 'secondary', title: 'Rest Day' }
+    }
+    
+    const workout = workoutTypes[item.type] || { icon: '🏃‍♂️', color: 'primary', title: 'Running Workout' }
+    
+    return `
+      <div class="card-body">
+        <div class="d-flex align-items-center mb-2">
+          <span class="badge bg-${workout.color} me-2">${workout.icon}</span>
+          <div class="flex-grow-1">
+            <div class="fw-semibold">${item.day} • ${item.date}</div>
+            <div class="text-secondary small">${workout.title}</div>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" ${checked ? 'checked' : ''} data-date="${item.date}" />
+          </div>
+        </div>
+        <div class="workout-details">
+          <div class="text-muted small">${item.workout}</div>
+        </div>
+        <div class="mt-2">
+          <button class="btn btn-outline-${workout.color} btn-sm" onclick="showRunningWorkoutDetails('${item.type}', '${item.date}')">
+            View Details
+          </button>
+        </div>
+      </div>
+    `
   }
 
   function renderFootballWorkout(item, position, checked) {
@@ -338,6 +378,12 @@
           { name: 'Lunges', details: '3 sets x 12 reps each leg' },
           { name: 'Single-leg Power', details: '3 sets x 8 reps each leg' },
           { name: 'Calf Raises', details: '4 sets x 15 reps' }
+        ],
+        'Running': [
+          { name: 'Single-leg Squats', details: '3 sets x 8 reps each leg' },
+          { name: 'Lunges', details: '3 sets x 12 reps each leg' },
+          { name: 'Calf Raises', details: '4 sets x 15 reps' },
+          { name: 'Hip Thrusts', details: '3 sets x 12 reps' }
         ]
       },
       conditioning: {
@@ -360,6 +406,11 @@
           { name: 'Coverage Drills', details: '25 minutes of 1v1 scenarios' },
           { name: 'Backpedal Work', details: '15 minutes of technique' },
           { name: 'Ball Skills', details: '10 minutes of interception practice' }
+        ],
+        'Running': [
+          { name: 'Tempo Run', details: '20-30 minutes at moderate pace' },
+          { name: 'Fartlek Training', details: '25 minutes of varied pace' },
+          { name: 'Hill Repeats', details: '6-8 x 2-minute hill climbs' }
         ]
       },
       skill: {
@@ -382,6 +433,11 @@
           { name: 'Mirror Drills', details: '20 minutes of reaction work' },
           { name: 'Ball Tracking', details: '15 minutes of interception practice' },
           { name: 'Hip Mobility', details: '10 minutes of flexibility work' }
+        ],
+        'Running': [
+          { name: 'Form Drills', details: '15 minutes of running mechanics' },
+          { name: 'Cadence Work', details: '10 minutes of stride rate practice' },
+          { name: 'Breathing Drills', details: '10 minutes of rhythm training' }
         ]
       },
       rest: {
@@ -404,6 +460,11 @@
           { name: 'Active Recovery', details: '20 minute light walk' },
           { name: 'Mobility Work', details: '15 minutes of stretching' },
           { name: 'Film Study', details: '30 minutes of coverage analysis' }
+        ],
+        'Running': [
+          { name: 'Easy Walk', details: '30 minute light walk' },
+          { name: 'Foam Rolling', details: '20 minutes of self-massage' },
+          { name: 'Yoga/Stretching', details: '30 minutes of flexibility work' }
         ]
       }
     }
@@ -449,6 +510,7 @@
     const completions = window.AppStorage.getCompletions()
     const profile = window.AppStorage.getProfile()
     const isFootball = profile && profile.sport === 'Football'
+    const isRunning = profile && profile.sport === 'Running'
     
     plan.forEach((item) => {
       const checked = !!completions[item.date]
@@ -457,6 +519,9 @@
       if (isFootball) {
         div.className = `card workout-card football-specific ${profile.position.toLowerCase()} ${item.type} ${checked ? 'done' : ''}`
         div.innerHTML = renderFootballWorkout(item, profile.position, checked)
+      } else if (isRunning) {
+        div.className = `card workout-card running-specific ${item.type} ${checked ? 'done' : ''}`
+        div.innerHTML = renderRunningWorkout(item, checked)
       } else {
         div.className = `card workout-card ${checked ? 'done' : ''}`
         div.innerHTML = `
@@ -558,6 +623,134 @@
     })
     renderStreak()
   }
+
+  // Running workout details function
+  function showRunningWorkoutDetails(type, date) {
+    const runningWorkouts = {
+      strength: {
+        title: 'Strength Training',
+        description: 'Running-specific strength exercises to improve power and prevent injury',
+        exercises: [
+          { name: 'Single-leg Squats', details: '3 sets x 8 reps each leg' },
+          { name: 'Lunges', details: '3 sets x 12 reps each leg' },
+          { name: 'Calf Raises', details: '4 sets x 15 reps' },
+          { name: 'Hip Thrusts', details: '3 sets x 12 reps' }
+        ],
+        tips: [
+          'Focus on single-leg movements to improve balance',
+          'Maintain proper form throughout each exercise',
+          'Control the eccentric (lowering) phase',
+          'Engage your core during all movements'
+        ]
+      },
+      skills: {
+        title: 'Form & Drills',
+        description: 'Running mechanics and technique work',
+        exercises: [
+          { name: 'Form Drills', details: '15 minutes of running mechanics' },
+          { name: 'Cadence Work', details: '10 minutes of stride rate practice' },
+          { name: 'Breathing Drills', details: '10 minutes of rhythm training' }
+        ],
+        tips: [
+          'Focus on landing on your midfoot',
+          'Maintain a slight forward lean from ankles',
+          'Keep your arms relaxed and moving forward',
+          'Practice breathing in rhythm with your steps'
+        ]
+      },
+      conditioning: {
+        title: 'Speed Work',
+        description: 'High-intensity training to improve speed and VO2 max',
+        exercises: [
+          { name: 'Tempo Run', details: '20-30 minutes at moderate pace' },
+          { name: 'Fartlek Training', details: '25 minutes of varied pace' },
+          { name: 'Hill Repeats', details: '6-8 x 2-minute hill climbs' }
+        ],
+        tips: [
+          'Warm up thoroughly before speed work',
+          'Start conservatively and build intensity',
+          'Focus on maintaining form at higher speeds',
+          'Cool down properly after intense efforts'
+        ]
+      },
+      mobility: {
+        title: 'Recovery & Mobility',
+        description: 'Active recovery and flexibility work',
+        exercises: [
+          { name: 'Easy Walk', details: '30 minute light walk' },
+          { name: 'Foam Rolling', details: '20 minutes of self-massage' },
+          { name: 'Yoga/Stretching', details: '30 minutes of flexibility work' }
+        ],
+        tips: [
+          'Listen to your body and adjust intensity',
+          'Focus on hip flexor and calf stretches',
+          'Use foam rolling for muscle recovery',
+          'Practice deep breathing during stretching'
+        ]
+      },
+      rest: {
+        title: 'Rest Day',
+        description: 'Complete rest or light active recovery',
+        exercises: [
+          { name: 'Optional Light Activity', details: '0-30 minutes of walking, yoga, or complete rest' }
+        ],
+        tips: [
+          'Rest is when your body adapts and gets stronger',
+          'Light walking or stretching is OK if you feel good',
+          'Focus on sleep and nutrition',
+          'Mental recovery is just as important as physical'
+        ]
+      }
+    }
+    
+    const workout = runningWorkouts[type] || runningWorkouts.strength
+    const modal = new bootstrap.Modal(document.getElementById('dayDetailModal'))
+    const titleEl = document.getElementById('dayDetailTitle')
+    const contentEl = document.getElementById('dayDetailContent')
+    
+    if (titleEl) titleEl.textContent = `${workout.title} - ${date}`
+    
+    if (contentEl) {
+      contentEl.innerHTML = `
+        <div class="mb-3">
+          <p class="text-muted">${workout.description}</p>
+        </div>
+        
+        <div class="mb-3">
+          <h6>Workout Structure</h6>
+          <div class="list-group">
+            ${workout.exercises.map(ex => `
+              <div class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="mb-1">${ex.name}</h6>
+                    <p class="mb-1 small">${ex.details}</p>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <h6>Key Tips</h6>
+          <ul class="list-unstyled">
+            ${workout.tips.map(tip => `<li class="mb-1">• ${tip}</li>`).join('')}
+          </ul>
+        </div>
+        
+        <div class="mb-3">
+          <h6>Running Nutrition</h6>
+          <p class="mb-0">Hydrate well, eat carbs 2-3 hours before, and consume protein + carbs within 30 minutes post-run for optimal recovery.</p>
+        </div>
+      `
+    }
+    
+    modal.show()
+  }
+
+  // Make the function globally available
+  window.showRunningWorkoutDetails = showRunningWorkoutDetails
 
   document.addEventListener('DOMContentLoaded', init)
 })()

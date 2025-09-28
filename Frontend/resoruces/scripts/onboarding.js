@@ -5,7 +5,7 @@
   - Athlete and diet tip helpers
 */
 ;(function () {
-  const SPORTS = ['Baseball', 'Basketball', 'Football', 'Tennis', 'Golf']
+  const SPORTS = ['Baseball', 'Basketball', 'Football', 'Golf', 'Running']
   const LEVELS = ['Beginner', 'Intermediate', 'Advanced']
 
   // Star athlete assets (served locally from resoruces/images)
@@ -13,8 +13,8 @@
     Baseball: { name: 'Shohei Ohtani', img: './resoruces/images/athlete-baseball.svg' },
     Basketball: { name: 'LeBron James', img: './resoruces/images/athlete-basketball.svg' },
     Football: { name: 'Patrick Mahomes', img: './resoruces/images/athlete-football.svg' },
-    Tennis: { name: 'Serena Williams', img: './resoruces/images/athlete-tennis.svg' },
     Golf: { name: 'Tiger Woods', img: './resoruces/images/athlete-golf.svg' },
+    Running: { name: 'Eliud Kipchoge', img: './resoruces/images/athlete-running.svg' },
   }
 
   // Position-specific football athletes
@@ -29,8 +29,8 @@
     Baseball: 'Lean protein, shoulder health, steady carbs.',
     Basketball: 'Hydrate; complex carbs + recovery protein.',
     Football: 'Protein: 1.6-2.0 g/kg/day • Carbs: 5-7 g/kg/day • Hydration: 3-5 L/day',
-    Tennis: 'Frequent small meals; electrolytes; quick match fuel.',
     Golf: 'Light steady energy; hydration; posture-support nutrients.',
+    Running: 'Carbs: 6-10 g/kg/day • Protein: 1.2-1.7 g/kg/day • Hydration: 35-40 ml/kg/day',
   }
 
   function intensity(level) {
@@ -61,10 +61,10 @@
         return { ...common, skills: 'Shooting + ball handling' }
       case 'Football':
         return { ...common, skills: 'Position-specific drills' }
-      case 'Tennis':
-        return { ...common, skills: 'Serve + footwork drills' }
       case 'Golf':
         return { ...common, skills: 'Swing mechanics + short game' }
+      case 'Running':
+        return { ...common, skills: 'Form drills + pace work' }
       default:
         return common
     }

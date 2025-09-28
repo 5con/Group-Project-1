@@ -486,4 +486,57 @@ body {
   margin-top: 0.25rem;
 }
 
+/* Running-specific styling */
+.running-specific {
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  border-left: 4px solid #10b981;
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+}
+
+.running-specific:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.running-specific.strength {
+  border-left-color: #3b82f6;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+}
+
+.running-specific.skills {
+  border-left-color: #10b981;
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+}
+
+.running-specific.conditioning {
+  border-left-color: #f59e0b;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+.running-specific.mobility {
+  border-left-color: #8b5cf6;
+  background: linear-gradient(135deg, #e9d5ff 0%, #ddd6fe 100%);
+}
+
+.running-specific.rest {
+  border-left-color: #6b7280;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+}
+
+.running-specific.done {
+  border-color: #059669;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+}
+
+/* Running athlete card */
+.athlete-card.running {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.athlete-card.running .text-secondary {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
 
