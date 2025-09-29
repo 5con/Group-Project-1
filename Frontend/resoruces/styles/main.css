@@ -539,4 +539,22 @@ body {
   color: rgba(255, 255, 255, 0.8) !important;
 }
 
+/* Running athlete image styling */
+.athlete-card.running img {
+  width: 96px;
+  height: 96px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  display: block;
+}
+
+/* Ensure the image loads properly */
+#athleteImg {
+  width: 96px;
+  height: 96px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
 

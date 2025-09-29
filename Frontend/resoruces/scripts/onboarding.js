@@ -14,7 +14,7 @@
     Basketball: { name: 'LeBron James', img: './resoruces/images/athlete-basketball.svg' },
     Football: { name: 'Patrick Mahomes', img: './resoruces/images/athlete-football.svg' },
     Golf: { name: 'Tiger Woods', img: './resoruces/images/athlete-golf.svg' },
-    Running: { name: 'Eliud Kipchoge', img: './resoruces/images/athlete-running.svg' },
+    Running: { name: 'Eliud Kipchoge', img: './resoruces/images/Eliud-Kipchoge.jpg' },
   }
 
   // Position-specific football athletes
