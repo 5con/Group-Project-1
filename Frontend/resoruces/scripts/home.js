@@ -707,6 +707,7 @@
     const modal = new bootstrap.Modal(document.getElementById('dayDetailModal'))
     const titleEl = document.getElementById('dayDetailTitle')
     const contentEl = document.getElementById('dayDetailContent')
+    const markCompleteBtn = document.getElementById('markCompleteBtn')
     
     if (titleEl) titleEl.textContent = `${workout.title} - ${date}`
     
@@ -744,6 +745,20 @@
           <p class="mb-0">Hydrate well, eat carbs 2-3 hours before, and consume protein + carbs within 30 minutes post-run for optimal recovery.</p>
         </div>
       `
+    }
+    
+    // Set up Mark Complete button functionality
+    const isCompleted = window.AppStorage.getCompletions()[date]
+    markCompleteBtn.textContent = isCompleted ? 'Mark Incomplete' : 'Mark Complete'
+    markCompleteBtn.onclick = function() {
+      const newStatus = !isCompleted
+      window.AppStorage.setCompletion(date, newStatus)
+      renderStreak()
+      modal.hide()
+      // Refresh the plan to update UI
+      const weekStart = window.AppStorage.getISODate(window.AppStorage.startOfWeek(new Date()))
+      const plan = window.AppStorage.getPlan(weekStart)
+      if (plan) renderPlan(plan)
     }
     
     modal.show()
