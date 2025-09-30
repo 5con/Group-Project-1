@@ -1,6 +1,5 @@
 /*
-  FitTrack Config (resoruces/scripts/config.js)
-  Centralized configuration for API endpoints and feature flags.
+  ProTrain Config (resoruces/scripts/config.js)
 */
 
 ;(function () {

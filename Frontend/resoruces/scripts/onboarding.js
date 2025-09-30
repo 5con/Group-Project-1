@@ -25,7 +25,7 @@
   // Star athlete assets (served locally from resoruces/images)
   const STAR_ATHLETES = {
     Baseball: { name: 'Shohei Ohtani', img: './resoruces/images/athlete-baseball.svg' },
-    Basketball: { name: 'LeBron James', img: './resoruces/images/athlete-basketball.svg' },
+    Basketball: { name: 'ProTrain Elite', img: './resoruces/images/athlete-basketball-forward.svg' },
     Football: { name: 'Patrick Mahomes', img: './resoruces/images/athlete-football.svg' },
     Golf: { name: 'Tiger Woods', img: './resoruces/images/athlete-golf.svg' },
     Running: { name: 'Eliud Kipchoge', img: './resoruces/images/athlete-running.svg' },
@@ -39,9 +39,9 @@
   }
 
   const BASKETBALL_POSITION_ATHLETES = {
-    PG: { name: 'Stephen Curry', img: './resoruces/images/athlete-basketball.svg' },
-    Forward: { name: 'Jayson Tatum', img: './resoruces/images/athlete-basketball.svg' },
-    Center: { name: 'Nikola Jokic', img: './resoruces/images/athlete-basketball.svg' },
+    PG: { name: 'Stephen Curry', img: './resoruces/images/athlete-basketball-pg.svg' },
+    Forward: { name: 'Jayson Tatum', img: './resoruces/images/athlete-basketball-forward.svg' },
+    Center: { name: 'Nikola Jokic', img: './resoruces/images/athlete-basketball-center.svg' },
   }
 
   const DIET_TIPS = {
@@ -57,7 +57,7 @@
       label: 'Point Guard',
       athlete: {
         name: 'Stephen Curry',
-        image: './resoruces/images/athlete-basketball.svg',
+        image: './resoruces/images/athlete-basketball-pg.svg',
         inspiration: 'Stephen Curry off-season micro-dose work',
       },
       metrics: [
@@ -463,7 +463,7 @@
       label: 'Forward',
       athlete: {
         name: 'Jayson Tatum',
-        image: './resoruces/images/athlete-basketball.svg',
+        image: './resoruces/images/athlete-basketball-forward.svg',
         inspiration: 'Jayson Tatum off-season positional work',
       },
       metrics: [
@@ -869,7 +869,7 @@
       label: 'Center',
       athlete: {
         name: 'Nikola Jokic',
-        image: './resoruces/images/athlete-basketball.svg',
+        image: './resoruces/images/athlete-basketball-center.svg',
         inspiration: 'Nikola Jokic high-post playmaking blueprint',
       },
       metrics: [

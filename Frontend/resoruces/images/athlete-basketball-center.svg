@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="title desc">
+  <title>Nikola Jokic Center Blueprint</title>
+  <desc>Stylized illustration of a basketball center posting up near the rim.</desc>
+  <defs>
+    <linearGradient id="center-bg" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e1b4b" />
+      <stop offset="100%" stop-color="#4338ca" />
+    </linearGradient>
+    <linearGradient id="center-ball" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#facc15" />
+      <stop offset="100%" stop-color="#eab308" />
+    </linearGradient>
+  </defs>
+  <rect width="160" height="160" rx="18" fill="url(#center-bg)" />
+  <path d="M28 126c12-42 32-64 52-64s40 22 52 64" fill="#312e81" opacity="0.35" />
+  <path d="M44 120c8-32 24-48 36-48s28 16 36 48" fill="#f8fafc" stroke="#facc15" stroke-width="4" stroke-linecap="round" />
+  <circle cx="80" cy="56" r="26" fill="#e0f2fe" stroke="#facc15" stroke-width="4" />
+  <circle cx="116" cy="52" r="18" fill="url(#center-ball)" stroke="#fde68a" stroke-width="3" />
+  <path d="M66 134h28" stroke="#facc15" stroke-width="7" stroke-linecap="round" />
+  <text x="80" y="152" font-size="18" font-family="'Segoe UI', sans-serif" text-anchor="middle" fill="#fde68a" font-weight="600">CTR</text>
+</svg>
+

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="title desc">
+  <title>Jayson Tatum Forward Blueprint</title>
+  <desc>Stylized illustration of a basketball forward driving to the hoop.</desc>
+  <defs>
+    <linearGradient id="forward-bg" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1f2937" />
+    </linearGradient>
+    <linearGradient id="forward-accent" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#22c55e" />
+      <stop offset="100%" stop-color="#16a34a" />
+    </linearGradient>
+  </defs>
+  <rect width="160" height="160" rx="18" fill="url(#forward-bg)" />
+  <path d="M32 124c10-40 26-60 48-60s38 20 48 60" fill="#111827" opacity="0.35" />
+  <path d="M46 118c6-30 20-46 34-46s28 16 34 46" fill="#f8fafc" stroke="#22c55e" stroke-width="4" stroke-linecap="round" />
+  <circle cx="78" cy="54" r="24" fill="#e2e8f0" stroke="#22c55e" stroke-width="4" />
+  <circle cx="116" cy="46" r="16" fill="url(#forward-accent)" stroke="#bbf7d0" stroke-width="3" />
+  <path d="M68 132h20" stroke="#22c55e" stroke-width="6" stroke-linecap="round" />
+  <text x="80" y="152" font-size="18" font-family="'Segoe UI', sans-serif" text-anchor="middle" fill="#bbf7d0" font-weight="600">FWD</text>
+</svg>
+

@@ -1,4 +1,4 @@
-# FitTrack Frontend
+# ProTrain Frontend
 
 Static Bootstrap 5 app (no build tools). Provides login, first-time onboarding, weekly workout plan, calendar, streak tracking, and settings.
 
