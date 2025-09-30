@@ -1,18 +1,86 @@
 using Backend.Models;
+using System.Security.Cryptography;
 
 namespace Backend.Services
 {
+    public class AuthService
+    {
+        private readonly PlanService _planService;
+
+        public AuthService(PlanService planService)
+        {
+            _planService = planService;
+        }
+
+        public string HashPassword(string password) => _planService.HashPassword(password);
+        public bool VerifyPassword(string password, string hashedPassword) => _planService.VerifyPassword(password, hashedPassword);
+    }
+
     public class PlanService
     {
+        public string HashPassword(string password)
+        {
+            // Generate a random salt
+            byte[] salt = new byte[16];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(salt);
+            }
+
+            // Hash the password with the salt
+            using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 10000, HashAlgorithmName.SHA256))
+            {
+                byte[] hash = pbkdf2.GetBytes(32);
+
+                // Combine salt and hash
+                byte[] hashBytes = new byte[48];
+                Array.Copy(salt, 0, hashBytes, 0, 16);
+                Array.Copy(hash, 0, hashBytes, 16, 32);
+
+                // Convert to base64 string
+                return Convert.ToBase64String(hashBytes);
+            }
+        }
+
+        public bool VerifyPassword(string password, string hashedPassword)
+        {
+            // Convert base64 string back to bytes
+            byte[] hashBytes = Convert.FromBase64String(hashedPassword);
+
+            // Extract salt and hash from the stored string
+            byte[] salt = new byte[16];
+            byte[] hash = new byte[32];
+            Array.Copy(hashBytes, 0, salt, 0, 16);
+            Array.Copy(hashBytes, 16, hash, 0, 32);
+
+            // Hash the provided password with the same salt
+            using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 10000, HashAlgorithmName.SHA256))
+            {
+                byte[] hashAttempt = pbkdf2.GetBytes(32);
+
+                // Compare the hashes
+                for (int i = 0; i < 32; i++)
+                {
+                    if (hash[i] != hashAttempt[i])
+                        return false;
+                }
+                return true;
+            }
+        }
         public (IEnumerable<PlanDay> days, object advice) GenerateWeeklyPlan(User user, DateOnly weekStart)
         {
             var plan = new List<PlanDay>();
             var sport = (user.Sport ?? "generic").ToLowerInvariant();
             var level = (user.Level ?? "beginner").ToLowerInvariant();
+            var position = user.Position;
+
             for (int i = 0; i < 7; i++)
             {
                 var date = weekStart.AddDays(i);
-                var (type, workout) = SuggestWorkout(sport, level, i);
+                var (type, workout) = sport == "football"
+                    ? GetFootballWorkout(position, level, i)
+                    : SuggestWorkout(sport, level, i);
+
                 plan.Add(new PlanDay
                 {
                     Date = date,
@@ -45,15 +113,11 @@ namespace Backend.Services
                 },
                 "football" => new[]
                 {
-                    "Prioritize lean protein for recovery",
-                    "Complex carbs for sustained energy",
-                    "Omega-3s to manage inflammation"
-                },
-                "tennis" => new[]
-                {
-                    "Carbs between sets for quick energy",
-                    "Banana + isotonic drink mid-session",
-                    "Protein within 45 minutes post match"
+                    "Protein: 1.6-2.0 g/kg bodyweight/day",
+                    "Carbohydrate: 5-7 g/kg/day (higher on heavy/skill days)",
+                    "Hydration: 3-5 L/day, electrolyte replacement after long practices",
+                    "Timing: Carb + protein snack within 60 minutes post-session",
+                    "Recovery: Anti-inflammatory foods (turmeric, berries)"
                 },
                 "golf" => new[]
                 {
@@ -70,6 +134,45 @@ namespace Backend.Services
             };
         }
 
+        public object GetPositionSpecificDietTips(string sport, string? position)
+        {
+            if (sport?.ToLowerInvariant() != "football" || string.IsNullOrEmpty(position))
+                return GetDietTips(sport ?? "generic");
+
+            return position.ToLowerInvariant() switch
+            {
+                "qb" or "quarterback" => new[]
+                {
+                    "Protein: 1.6-2.0 g/kg/day",
+                    "Carbohydrate: 5-7 g/kg/day (higher on heavy/skill days)",
+                    "Hydration: 3-5 L/day, electrolyte replacement after long practices",
+                    "Timing: Carb + protein snack within 60 minutes post-session"
+                },
+                "wr" or "receiver" => new[]
+                {
+                    "Protein: 1.6-2.0 g/kg/day",
+                    "Carbohydrate: 5-7 g/kg/day (high around sprint days)",
+                    "Calories: Slightly less than QB unless bulking",
+                    "Emphasize lean speed, agility fueling"
+                },
+                "lb" or "linebacker" => new[]
+                {
+                    "Protein: 1.8-2.0 g/kg/day",
+                    "Carbohydrate: 5-7 g/kg/day (higher for mass + power days)",
+                    "Calories: Often in surplus to maintain/build mass",
+                    "Emphasize fueling strength and recovery"
+                },
+                "cb" or "cornerback" => new[]
+                {
+                    "Protein: 1.6-2.0 g/kg/day",
+                    "Carbohydrate: 5-6 g/kg/day (fuel agility + sprint work)",
+                    "Calories: Slightly lower than WR if maintaining lighter playing weight",
+                    "Focus on staying lean, quick, and agile"
+                },
+                _ => GetDietTips(sport)
+            };
+        }
+
         private static (string type, string workout) SuggestWorkout(string sport, string level, int dayIndex)
         {
             bool isRest = (dayIndex == 3 || dayIndex == 6) && level == "beginner";
@@ -83,9 +186,6 @@ namespace Backend.Services
                 "football" => dayIndex % 2 == 0
                     ? ("strength", "Power: cleans, squats, bench; Accessory: rows, hamstrings")
                     : ("conditioning", "Tempo runs, shuttle, agility ladder, sled pushes"),
-                "tennis" => dayIndex % 2 == 0
-                    ? ("skill", "Serve practice, cross-court drills, footwork ladders")
-                    : ("strength", "Upper body pull/push superset + rotational core"),
                 "golf" => dayIndex % 2 == 0
                     ? ("mobility", "T-spine rotation, hip mobility, band work, putting")
                     : ("strength", "Glute bridges, deadlifts light, anti-rotation core"),
@@ -117,6 +217,90 @@ namespace Backend.Services
             var carbs = (int)(kcal * 0.40 / 4);
             var fat = (int)(kcal * 0.30 / 9);
             return new { protein_g = protein, carbs_g = carbs, fat_g = fat };
+        }
+
+        private static (string type, string workout) GetFootballWorkout(string? position, string level, int dayIndex)
+        {
+            var pos = (position ?? "generic").ToLowerInvariant();
+            var isRest = (dayIndex == 3 || dayIndex == 6) && level == "beginner";
+
+            if (isRest) return ("rest", "Active recovery: 20 min walk + mobility work");
+
+            return pos switch
+            {
+                "qb" or "quarterback" => GetQBWorkout(level, dayIndex),
+                "wr" or "receiver" => GetWRWorkout(level, dayIndex),
+                "lb" or "linebacker" => GetLBWorkout(level, dayIndex),
+                "cb" or "cornerback" => GetCBWorkout(level, dayIndex),
+                _ => GetGenericFootballWorkout(level, dayIndex)
+            };
+        }
+
+        private static (string type, string workout) GetQBWorkout(string level, int dayIndex)
+        {
+            return dayIndex switch
+            {
+                0 => ("strength", "Lower body emphasis: Squats, RDLs, sled pushes"),
+                1 => ("skill", "Speed & Agility + Throwing: Footwork, sprints, mechanics"),
+                2 => ("strength", "Power & Upper body: Cleans, med-ball throws, push press"),
+                3 => ("rest", "Recovery + Film Study + Mobility"),
+                4 => ("conditioning", "Position Simulation & Conditioning: 7-on-7, sprints"),
+                5 => ("strength", "Upper body heavy, core stability"),
+                6 => ("rest", "Long Recovery + Light Throwing"),
+                _ => ("rest", "Active recovery")
+            };
+        }
+
+        private static (string type, string workout) GetWRWorkout(string level, int dayIndex)
+        {
+            return dayIndex switch
+            {
+                0 => ("skill", "Speed development: Flying sprints, bounding, route acceleration"),
+                1 => ("strength", "Lower body focus: Squats, lunges, plyometric jumps"),
+                2 => ("skill", "Agility + Route running: Cone drills, COD, catching"),
+                3 => ("rest", "Recovery + Film Study"),
+                4 => ("conditioning", "Top-end sprint intervals + Route reps: Long ball & short routes"),
+                5 => ("strength", "Upper body push/pull, explosive lifts"),
+                6 => ("rest", "Recovery mobility + Light skill drills: Hands, rhythm routes"),
+                _ => ("rest", "Active recovery")
+            };
+        }
+
+        private static (string type, string workout) GetLBWorkout(string level, int dayIndex)
+        {
+            return dayIndex switch
+            {
+                0 => ("strength", "Heavy lower: Squats, deadlifts, sled pushes"),
+                1 => ("skill", "Speed & Agility: Short bursts, lateral movement, tackling footwork"),
+                2 => ("strength", "Power & Explosiveness: Cleans, med-ball slams, box jumps"),
+                3 => ("rest", "Recovery + Film Study"),
+                4 => ("conditioning", "Contact conditioning: Sled hits, tackling form, reaction drills"),
+                5 => ("strength", "Upper body: Bench, rows, weighted carries"),
+                6 => ("rest", "Active recovery + Mobility"),
+                _ => ("rest", "Active recovery")
+            };
+        }
+
+        private static (string type, string workout) GetCBWorkout(string level, int dayIndex)
+        {
+            return dayIndex switch
+            {
+                0 => ("skill", "Speed & Agility: Short sprints, lateral quickness drills"),
+                1 => ("strength", "Lower body: Squats, lunges, single-leg power"),
+                2 => ("skill", "Agility & Reaction: Mirror drills, COD, ball tracking"),
+                3 => ("rest", "Recovery + Film Study"),
+                4 => ("conditioning", "Top-speed intervals + Coverage footwork: 1v1 simulation"),
+                5 => ("strength", "Upper body, grip work, pull-ups, presses"),
+                6 => ("rest", "Active recovery + Light mobility/footwork"),
+                _ => ("rest", "Active recovery")
+            };
+        }
+
+        private static (string type, string workout) GetGenericFootballWorkout(string level, int dayIndex)
+        {
+            return dayIndex % 2 == 0
+                ? ("strength", "Full-body power: Cleans, squats, bench, rows, core")
+                : ("conditioning", "Sprint intervals, agility drills, functional movements");
         }
     }
 }
