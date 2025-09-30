@@ -1,4 +1,4 @@
-# FitTrack Backend (.NET API)
+# ProTrain Backend (.NET API)
 
 Minimal ASP.NET Core Web API with SQLite and an ORM (Entity Framework Core). Provides CRUD for Users and generated weekly plans based on sport and level.
 
