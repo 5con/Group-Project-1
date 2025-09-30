@@ -108,10 +108,6 @@
                   <label class="form-label" for="position">Position</label>
                   <select class="form-select" id="position">
                     <option value="" selected disabled>Select position</option>
-                    <option value="QB">Quarterback</option>
-                    <option value="WR">Wide Receiver</option>
-                    <option value="LB">Linebacker</option>
-                    <option value="CB">Cornerback</option>
                   </select>
                 </div>
                 <div class="col-12">
@@ -147,6 +143,22 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             <button type="button" class="btn btn-primary" id="markCompleteBtn">Mark Complete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fuel Plan Modal -->
+    <div class="modal fade" id="fuelPlanModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="fuelPlanTitle">Fuel Plan</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="fuelPlanContent"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
       </div>

@@ -5,6 +5,7 @@
   - Tracks completion and updates streak badge
 */
 ;(function () {
+  let cachedPlan = []
   function renderStreak() {
     const el = document.getElementById('streakBadge')
     if (!el) return
@@ -16,30 +17,46 @@
     const athlete = window.Onboarding.getStarAthlete(profile.sport, profile.position)
     document.getElementById('athleteImg').src = athlete.img
     document.getElementById('athleteName').textContent = athlete.name
-    const sportLabel = profile.sport === 'Football' && profile.position 
+
+    const showPosition = profile.position && profile.position.length > 0
+    const sportLabel = showPosition
       ? `${profile.sport} • ${profile.position} • ${profile.level}`
       : `${profile.sport} • ${profile.level}`
     document.getElementById('sportLabel').textContent = sportLabel
-    
-    // Use fallback diet tip for now, will be updated by API call
+
     const diet = window.Onboarding.getDietTip(profile.sport)
     document.getElementById('dietTips').textContent = diet
-    
-    // Add sport-specific styling to athlete card
-    if (profile.sport === 'Football' && profile.position) {
-      const athleteCard = document.querySelector('#athleteImg').closest('.card')
-      if (athleteCard) {
-        athleteCard.classList.add('athlete-card', profile.position.toLowerCase())
+
+    const athleteCard = document.querySelector('#athleteImg').closest('.card')
+    if (athleteCard) {
+      athleteCard.classList.remove(
+        'athlete-card',
+        'qb',
+        'wr',
+        'lb',
+        'cb',
+        'running',
+        'basketball',
+        'pg',
+        'forward',
+        'center'
+      )
+      athleteCard.classList.add('athlete-card')
+
+      if (profile.sport === 'Football' && profile.position) {
+        athleteCard.classList.add(profile.position.toLowerCase())
       }
-      
-      // Show position dashboard
-      renderPositionDashboard(profile.position)
-    } else if (profile.sport === 'Running') {
-      const athleteCard = document.querySelector('#athleteImg').closest('.card')
-      if (athleteCard) {
-        athleteCard.classList.add('athlete-card', 'running')
+
+      if (profile.sport === 'Running') {
+        athleteCard.classList.add('running')
+      }
+
+      if (profile.sport === 'Basketball' && profile.position) {
+        athleteCard.classList.add('basketball', profile.position.toLowerCase())
       }
     }
+
+    renderPositionDashboard(profile)
   }
 
   function getPositionIcon(position) {
@@ -47,7 +64,10 @@
       'QB': '🏈',
       'WR': '⚡',
       'LB': '🎯',
-      'CB': '🏃‍♂️'
+      'CB': '🏃‍♂️',
+      'PG': '🧠',
+      'Forward': '🎯',
+      'Center': '🎯'
     }
     return icons[position] || '🏈'
   }
@@ -179,18 +199,35 @@
     return dots
   }
 
-  function renderPositionDashboard(position) {
+  function renderPositionDashboard(profile) {
     const dashboard = document.getElementById('positionDashboard')
     const metrics = document.getElementById('positionMetrics')
-    
+
     if (!dashboard || !metrics) return
-    
+
+    const sport = profile?.sport
+    const position = profile?.position
+
+    if (!sport || !position) {
+      dashboard.style.display = 'none'
+      metrics.innerHTML = ''
+      return
+    }
+
+    const data = getPositionMetricsForSport(sport, position)
+    if (!data || data.metrics.length === 0) {
+      dashboard.style.display = 'none'
+      metrics.innerHTML = ''
+      return
+    }
+
     dashboard.style.display = 'block'
-    const positionClass = position.toLowerCase()
-    
-    const positionMetrics = getPositionMetrics(position)
-    
-    metrics.innerHTML = positionMetrics.map(metric => `
+
+    const positionClass = (data.className || position).toLowerCase()
+
+    metrics.innerHTML = data.metrics
+      .map(
+        (metric) => `
       <div class="metric-card ${positionClass}">
         <div class="d-flex justify-content-between align-items-center">
           <div>
@@ -205,46 +242,60 @@
           <div class="metric-progress-bar ${positionClass}" style="width: ${metric.progress}%"></div>
         </div>
       </div>
-    `).join('')
+    `
+      )
+      .join('')
   }
 
-  function getPositionMetrics(position) {
-    const metrics = {
-      'QB': [
-        { label: 'Throwing Accuracy', value: '87%', target: 'Target: 90%', progress: 87 },
-        { label: 'Pocket Time', value: '3.2s', target: 'Target: 3.5s', progress: 91 },
-        { label: 'Decision Speed', value: '2.1s', target: 'Target: 2.0s', progress: 95 }
-      ],
-      'WR': [
-        { label: 'Route Running', value: '92%', target: 'Target: 95%', progress: 92 },
-        { label: 'Catch Rate', value: '89%', target: 'Target: 90%', progress: 89 },
-        { label: '40-Yard Dash', value: '4.3s', target: 'Target: 4.2s', progress: 95 }
-      ],
-      'LB': [
-        { label: 'Tackling Form', value: '94%', target: 'Target: 95%', progress: 94 },
-        { label: 'Reaction Time', value: '0.8s', target: 'Target: 0.7s', progress: 88 },
-        { label: 'Bench Press', value: '315 lbs', target: 'Target: 325 lbs', progress: 97 }
-      ],
-      'CB': [
-        { label: 'Coverage Skills', value: '91%', target: 'Target: 93%', progress: 91 },
-        { label: 'Hip Flexibility', value: '88%', target: 'Target: 90%', progress: 88 },
-        { label: 'Shuttle Run', value: '4.1s', target: 'Target: 4.0s', progress: 98 }
-      ]
+  function getPositionMetricsForSport(sport, position) {
+    if (sport === 'Football') {
+      const metrics = {
+        QB: [
+          { label: 'Throwing Accuracy', value: '87%', target: 'Goal: 90%', progress: 87 },
+          { label: 'Pocket Time', value: '3.2s', target: 'Goal: 3.5s', progress: 91 },
+          { label: 'Decision Speed', value: '2.1s', target: 'Goal: 2.0s', progress: 95 }
+        ],
+        WR: [
+          { label: 'Route Running', value: '92%', target: 'Goal: 95%', progress: 92 },
+          { label: 'Catch Rate', value: '89%', target: 'Goal: 90%', progress: 89 },
+          { label: '40-Yard Dash', value: '4.3s', target: 'Goal: 4.2s', progress: 95 }
+        ],
+        LB: [
+          { label: 'Tackling Form', value: '94%', target: 'Goal: 95%', progress: 94 },
+          { label: 'Reaction Time', value: '0.8s', target: 'Goal: 0.7s', progress: 88 },
+          { label: 'Bench Press', value: '315 lbs', target: 'Goal: 325 lbs', progress: 97 }
+        ],
+        CB: [
+          { label: 'Coverage Skills', value: '91%', target: 'Goal: 93%', progress: 91 },
+          { label: 'Hip Flexibility', value: '88%', target: 'Goal: 90%', progress: 88 },
+          { label: 'Shuttle Run', value: '4.1s', target: 'Goal: 4.0s', progress: 98 }
+        ]
+      }
+      return { className: position, metrics: metrics[position] || [] }
     }
-    
-    return metrics[position] || []
+
+    if (sport === 'Basketball') {
+      const blueprints = window.Onboarding?.BASKETBALL_BLUEPRINTS
+      const blueprint = blueprints ? blueprints[position] : null
+      if (!blueprint) return null
+      return { className: position, metrics: blueprint.metrics || [] }
+    }
+
+    return null
   }
 
-  function renderEnhancedNutrition(tips, position) {
+  function renderEnhancedNutrition(tips, position, sport) {
     const nutritionContent = document.getElementById('nutritionContent')
     if (!nutritionContent) return
-    
+
     const positionClass = position ? position.toLowerCase() : ''
     const tipsArray = Array.isArray(tips) ? tips : [String(tips)]
-    
-    // Get position-specific macro targets
-    const macroTargets = getPositionMacros(position)
-    
+
+    const macroTargets = getPositionMacros(position, sport)
+    const hydrationInfo = getHydrationInfo(position, sport)
+    const blueprint = sport === 'Basketball' ? window.Onboarding?.BASKETBALL_BLUEPRINTS?.[position] : null
+    const businessTips = blueprint?.nutritionTips || []
+
     nutritionContent.innerHTML = `
       <div class="nutrition-card ${positionClass}">
         <h6 class="mb-2">Daily Macros</h6>
@@ -263,92 +314,251 @@
           </div>
         </div>
       </div>
-      
+
       <div class="nutrition-card ${positionClass}">
         <h6 class="mb-2">Nutrition Tips</h6>
         ${tipsArray.map(tip => `<div class="nutrition-tip">${tip}</div>`).join('')}
+        ${businessTips.map(tip => `<div class="nutrition-tip">${tip}</div>`).join('')}
       </div>
-      
+
       <div class="hydration-tracker">
         <div class="d-flex justify-content-between align-items-center">
           <h6 class="mb-0">Hydration Goal</h6>
-          <span class="fw-semibold">3.5L / 5L</span>
+          <span class="fw-semibold">${hydrationInfo.goal}</span>
         </div>
         <div class="hydration-progress">
           <div class="hydration-bar" style="width: 70%"></div>
         </div>
-        <small class="text-muted mt-1 d-block">Drink 16-20oz 2h before training</small>
+        <small class="text-muted mt-1 d-block">${hydrationInfo.notes}</small>
       </div>
     `
   }
 
-  function getPositionMacros(position) {
+  function getPositionMacros(position, sport) {
+    if (sport === 'Basketball') {
+      const blueprint = window.Onboarding?.BASKETBALL_BLUEPRINTS?.[position]
+      if (blueprint?.macros) return blueprint.macros
+      return { protein: 180, carbs: 450, fat: 85 }
+    }
+
     const macros = {
-      'QB': { protein: 160, carbs: 400, fat: 80 },
-      'WR': { protein: 150, carbs: 380, fat: 75 },
-      'LB': { protein: 180, carbs: 420, fat: 90 },
-      'CB': { protein: 155, carbs: 360, fat: 70 }
+      QB: { protein: 160, carbs: 400, fat: 80 },
+      WR: { protein: 150, carbs: 380, fat: 75 },
+      LB: { protein: 180, carbs: 420, fat: 90 },
+      CB: { protein: 155, carbs: 360, fat: 70 }
     }
     return macros[position] || { protein: 160, carbs: 400, fat: 80 }
   }
 
-  function showDayDetail(day, date, workout, type, profile) {
+  function getHydrationInfo(position, sport) {
+    if (sport === 'Basketball') {
+      const blueprint = window.Onboarding?.BASKETBALL_BLUEPRINTS?.[position]
+      if (blueprint?.hydration) return blueprint.hydration
+      return {
+        goal: '4.0L / day',
+        notes: 'Sip 12-14oz every 20 minutes during court work.'
+      }
+    }
+
+    return {
+      goal: '3.5L / 5L',
+      notes: 'Drink 16-20oz 2h before training'
+    }
+  }
+
+  function renderBasketballWorkout(item, profile, checked) {
+    const blueprint = window.Onboarding?.BASKETBALL_BLUEPRINTS?.[profile.position]
+    const level = profile.level
+    const data = blueprint?.sessions?.[item.key]
+
+    const intensity = data?.intensity?.[level] || 3
+    const duration = data?.duration?.[level] || '60 min'
+    const equipment = data?.equipment || 'Basketball + court'
+    const icon = profile.position === 'PG' ? '🏀' : profile.position === 'Forward' ? '🛡️' : '🛠️'
+
+    const summary = data?.cardSummary?.[level] || item.workout
+    const notes = (data?.notes || []).slice(0, 2)
+
+    return `
+      <div class="card-body">
+        <div class="d-flex align-items-start gap-3">
+          <div class="basketball-icon ${profile.position.toLowerCase()}">${icon}</div>
+          <div class="flex-grow-1">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <h6 class="mb-1 fw-semibold">${item.day} • ${item.date}</h6>
+                <p class="mb-1 text-muted">${summary}</p>
+                <div class="d-flex flex-wrap gap-3 small text-secondary">
+                  <span><span class="equipment-icon">⏱️</span>${duration}</span>
+                  <span><span class="equipment-icon">🧰</span>${equipment}</span>
+                </div>
+              </div>
+              <div class="text-end">
+                <span class="badge text-bg-dark text-uppercase">${item.type}</span>
+                <div class="form-check mt-2">
+                  <input class="form-check-input" type="checkbox" ${checked ? 'checked' : ''} data-date="${item.date}" />
+                </div>
+              </div>
+            </div>
+            <div class="intensity-meter mt-2">
+              ${getIntensityDots(intensity)}
+            </div>
+            ${notes.length > 0 ? `
+            <ul class="mt-3 mb-0 small text-secondary basketball-notes">
+              ${notes.map((note) => `<li>${note}</li>`).join('')}
+            </ul>
+            ` : ''}
+            ${data?.doubleSession?.[level] ? `
+            <div class="alert alert-warning mt-3 py-2 px-3 small">
+              <strong>PM Block:</strong> ${data.doubleSession[level]}
+            </div>
+            ` : ''}
+          </div>
+        </div>
+      </div>
+    `
+  }
+
+  function showDayDetail(day, date, workout, type, profile, planItem) {
     const modal = new bootstrap.Modal(document.getElementById('dayDetailModal'))
     const title = document.getElementById('dayDetailTitle')
     const content = document.getElementById('dayDetailContent')
     const markCompleteBtn = document.getElementById('markCompleteBtn')
-    
+
     title.textContent = `${day} • ${date} - ${type.toUpperCase()}`
-    
+
     const positionClass = profile.position ? profile.position.toLowerCase() : ''
     const isCompleted = window.AppStorage.getCompletions()[date]
-    
-    content.innerHTML = `
-      <div class="workout-detail-card ${positionClass}">
-        <h5 class="mb-3">${type.toUpperCase()} Workout</h5>
-        <p class="mb-3">${workout}</p>
-        <h6 class="mb-2">Exercise Breakdown:</h6>
-        <ul class="exercise-list">
-          ${getExerciseBreakdown(type, profile.position).map(exercise => `
-            <li class="exercise-item">
-              <div>
-                <div class="exercise-name">${exercise.name}</div>
-                <div class="exercise-details">${exercise.details}</div>
-              </div>
-            </li>
-          `).join('')}
-        </ul>
-      </div>
-      
-      <div class="nutrition-detail-card">
-        <h5 class="mb-3">Daily Nutrition Plan</h5>
-        <div class="meal-timing">
-          <div class="meal-time">Pre-Workout (2-3 hours before)</div>
-          <div class="meal-content">${getPreWorkoutMeal(type, profile.position)}</div>
+
+    if (profile.sport === 'Basketball' && planItem) {
+      const blueprint = window.Onboarding?.BASKETBALL_BLUEPRINTS?.[profile.position]
+      const session = planItem.key ? blueprint?.sessions?.[planItem.key] : null
+      const level = profile.level
+
+      const exercises = session ? getBasketballExerciseBreakdown(session, level) : []
+      const nutrition = session?.nutrition?.[level] || {}
+
+      content.innerHTML = `
+        <div class="workout-detail-card ${positionClass}">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <h5 class="mb-0">${session?.title || `${type.toUpperCase()} Workout`}</h5>
+            ${session?.inspiration ? `<span class="badge text-bg-dark">${session.inspiration}</span>` : ''}
+          </div>
+          <p class="mb-3">${session?.summary || workout}</p>
+          ${session?.film ? `<div class="alert alert-secondary py-2 px-3 small">Film Study: ${session.film}</div>` : ''}
+          ${session?.segments ? `
+          <h6 class="mt-3 mb-2">Session Blocks</h6>
+          <ol class="exercise-list">
+            ${session.segments.map((segment, index) => `
+              <li class="exercise-item">
+                <div>
+                  <div class="exercise-name">${index + 1}. ${segment.split(':')[0]}</div>
+                  <div class="exercise-details">${segment}</div>
+                </div>
+              </li>
+            `).join('')}
+          </ol>
+          ` : ''}
+          ${exercises.length > 0 ? `
+          <h6 class="mt-3 mb-2">Level Focus & Finishers</h6>
+          <ul class="exercise-list">
+            ${exercises.map((exercise) => `
+              <li class="exercise-item">
+                <div>
+                  <div class="exercise-name">${exercise.name}</div>
+                  <div class="exercise-details">${exercise.details}</div>
+                </div>
+              </li>
+            `).join('')}
+          </ul>
+          ` : ''}
+          ${session?.notes?.length ? `
+          <div class="alert alert-info mt-3 py-2 px-3 small">
+            <strong>Coach Notes:</strong> ${session.notes.join(' • ')}
+          </div>
+          ` : ''}
         </div>
-        <div class="meal-timing">
-          <div class="meal-time">Post-Workout (within 30 minutes)</div>
-          <div class="meal-content">${getPostWorkoutMeal(type, profile.position)}</div>
+
+        <div class="nutrition-detail-card">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Fuel Strategy</h5>
+            <button type="button" class="btn btn-outline-dark btn-sm" id="openFuelPlanBtn">Full Plan</button>
+          </div>
+          <div class="meal-timing">
+            <div class="meal-time">Pre-Workout (2h prior)</div>
+            <div class="meal-content">${nutrition.pre || 'High-carb plate + lean protein + hydration stack.'}</div>
+          </div>
+          <div class="meal-timing">
+            <div class="meal-time">During Session</div>
+            <div class="meal-content">${nutrition.during || 'Water + electrolytes every 20 minutes.'}</div>
+          </div>
+          <div class="meal-timing">
+            <div class="meal-time">Post-Workout (30 min)</div>
+            <div class="meal-content">${nutrition.post || '30g protein + 60-80g carbs within 30 minutes.'}</div>
+          </div>
+          <div class="meal-timing">
+            <div class="meal-time">Evening Recovery</div>
+            <div class="meal-content">${nutrition.evening || 'Balanced meal with lean protein, complex carbs, antioxidants.'}</div>
+          </div>
         </div>
-        <div class="meal-timing">
-          <div class="meal-time">Evening Recovery</div>
-          <div class="meal-content">${getEveningMeal(type, profile.position)}</div>
+      `
+
+      setTimeout(() => {
+        const btn = document.getElementById('openFuelPlanBtn')
+        if (btn) {
+          btn.addEventListener('click', function (event) {
+            event.stopPropagation()
+            openFuelPlanModal(profile, session, level)
+          })
+        }
+      }, 0)
+    } else {
+      content.innerHTML = `
+        <div class="workout-detail-card ${positionClass}">
+          <h5 class="mb-3">${type.toUpperCase()} Workout</h5>
+          <p class="mb-3">${workout}</p>
+          <h6 class="mb-2">Exercise Breakdown:</h6>
+          <ul class="exercise-list">
+            ${getExerciseBreakdown(type, profile.position).map(exercise => `
+              <li class="exercise-item">
+                <div>
+                  <div class="exercise-name">${exercise.name}</div>
+                  <div class="exercise-details">${exercise.details}</div>
+                </div>
+              </li>
+            `).join('')}
+          </ul>
         </div>
-      </div>
-    `
-    
+
+        <div class="nutrition-detail-card">
+          <h5 class="mb-3">Daily Nutrition Plan</h5>
+          <div class="meal-timing">
+            <div class="meal-time">Pre-Workout (2-3 hours before)</div>
+            <div class="meal-content">${getPreWorkoutMeal(type, profile.position)}</div>
+          </div>
+          <div class="meal-timing">
+            <div class="meal-time">Post-Workout (within 30 minutes)</div>
+            <div class="meal-content">${getPostWorkoutMeal(type, profile.position)}</div>
+          </div>
+          <div class="meal-timing">
+            <div class="meal-time">Evening Recovery</div>
+            <div class="meal-content">${getEveningMeal(type, profile.position)}</div>
+          </div>
+        </div>
+      `
+    }
+
     markCompleteBtn.textContent = isCompleted ? 'Mark Incomplete' : 'Mark Complete'
     markCompleteBtn.onclick = function() {
       const newStatus = !isCompleted
       window.AppStorage.setCompletion(date, newStatus)
       renderStreak()
       modal.hide()
-      // Refresh the plan to update UI
       const weekStart = window.AppStorage.getISODate(window.AppStorage.startOfWeek(new Date()))
       const plan = window.AppStorage.getPlan(weekStart)
       if (plan) renderPlan(plan)
     }
-    
+
     modal.show()
   }
 
@@ -379,6 +589,24 @@
           { name: 'Single-leg Power', details: '3 sets x 8 reps each leg' },
           { name: 'Calf Raises', details: '4 sets x 15 reps' }
         ],
+        'PG': [
+          { name: 'Trap Bar Deadlift Clusters', details: '5x3 @ 85% with velocity feedback' },
+          { name: 'Single-leg Pogo Jumps', details: '4x8 each leg with 45s rest' },
+          { name: 'Half-kneeling Cable Press', details: '3x10 with anti-rotation focus' },
+          { name: 'Med-ball Hook Passes', details: '3x10 each side with intent' }
+        ],
+        'Forward': [
+          { name: 'Front Squat Waves', details: '4x5 @ 80% + iso holds 30s' },
+          { name: 'Landmine Press + Med-ball Chest Pass', details: 'Super-set 4 rounds' },
+          { name: 'Rear-foot Split Squat', details: '4x8 each leg @ RPE 8' },
+          { name: 'Sled Push Finish', details: '4x25m heavy push' }
+        ],
+        'Center': [
+          { name: 'Front Squat Triples', details: '5x3 @ 85% with tempo eccentric' },
+          { name: 'Farmer/Yoke Carry', details: '4x30m heavy, tall posture' },
+          { name: 'Glute Bridge Iso', details: '4x20s hold + 10 reps' },
+          { name: 'Thoracic Mobility Pairing', details: 'Between sets, 30s each side' }
+        ],
         'Running': [
           { name: 'Single-leg Squats', details: '3 sets x 8 reps each leg' },
           { name: 'Lunges', details: '3 sets x 12 reps each leg' },
@@ -407,6 +635,21 @@
           { name: 'Backpedal Work', details: '15 minutes of technique' },
           { name: 'Ball Skills', details: '10 minutes of interception practice' }
         ],
+        'PG': [
+          { name: 'Agility Ladder Flow', details: '6 rounds with cross-over, Icky shuffle, lateral in/outs' },
+          { name: 'Lane Agility Shuttle', details: '5 reps targeting sub 10.5s, add resistance for advanced' },
+          { name: 'Court Tempo Runs', details: '10 reps baseline-to-baseline at 1:2 work:rest' }
+        ],
+        'Forward': [
+          { name: 'Defensive Slide Matrix', details: '6 sets with closeout + retreat sequences' },
+          { name: 'Halfcourt to Fullcourt Tempos', details: '8 reps, focus on posture and decels' },
+          { name: 'Single-leg Bounds', details: '3x12 each leg with soft landings' }
+        ],
+        'Center': [
+          { name: 'Lane Sprint Repeats', details: '8 reps, 1:1 rest, track best time' },
+          { name: 'Sled Drags Forward/Backward', details: '5 sets heavy drag 15m each direction' },
+          { name: 'Bike Intervals', details: '8 x 30s hard / 45s easy, nasal breathing on recovery' }
+        ],
         'Running': [
           { name: 'Tempo Run', details: '20-30 minutes at moderate pace' },
           { name: 'Fartlek Training', details: '25 minutes of varied pace' },
@@ -433,6 +676,21 @@
           { name: 'Mirror Drills', details: '20 minutes of reaction work' },
           { name: 'Ball Tracking', details: '15 minutes of interception practice' },
           { name: 'Hip Mobility', details: '10 minutes of flexibility work' }
+        ],
+        'PG': [
+          { name: 'Two-Ball Ladder', details: '5 rounds including tennis ball distraction' },
+          { name: 'Pick-and-Roll Pace Finishes', details: '4 sets w/ pad contact, add veer + hang dribbles advanced' },
+          { name: 'Relocation Shooting Circuit', details: '80 makes with drift + flare patterns' }
+        ],
+        'Forward': [
+          { name: 'Triple-Threat Ladder', details: '60 makes across spots with jab counter progression' },
+          { name: 'Mid-post Footwork', details: 'Spin, fade, step-through with pad contact' },
+          { name: 'Sidestep & Drift 3s', details: '4 rounds focusing on balance + speed' }
+        ],
+        'Center': [
+          { name: 'High-Post DHO Sequencing', details: '8-minute blocks, add fake DHO + re-screen' },
+          { name: 'Low-post Counter Series', details: 'Drop-step, up-and-under, Sombor shuffle' },
+          { name: 'Short-roll Passing', details: '20 assisted reps hitting cutters + corners' }
         ],
         'Running': [
           { name: 'Form Drills', details: '15 minutes of running mechanics' },
@@ -461,6 +719,21 @@
           { name: 'Mobility Work', details: '15 minutes of stretching' },
           { name: 'Film Study', details: '30 minutes of coverage analysis' }
         ],
+        'PG': [
+          { name: 'Mobility Flow', details: '20 minutes hips/ankles/thoracic + breath work' },
+          { name: 'Film Reset', details: '30 minutes pick-and-roll reads vs coverage' },
+          { name: 'Mindfulness', details: '10 minutes guided breathing and journaling' }
+        ],
+        'Forward': [
+          { name: 'Mobility & Yoga', details: '25 minutes hip + shoulder flow' },
+          { name: 'NormaTec or Bike Flush', details: '20 minutes easy effort' },
+          { name: 'Visualization', details: '10 minutes game scenarios' }
+        ],
+        'Center': [
+          { name: 'Pool Walk or Bike', details: '20 minutes low-impact movement' },
+          { name: 'Mobility Flow', details: '20 minutes focusing on hips and thoracic' },
+          { name: 'Breath Ladder', details: '8 minutes box breathing + HRV check' }
+        ],
         'Running': [
           { name: 'Easy Walk', details: '30 minute light walk' },
           { name: 'Foam Rolling', details: '20 minutes of self-massage' },
@@ -468,7 +741,7 @@
         ]
       }
     }
-    
+
     return exercises[type]?.[position] || [
       { name: 'General Exercise', details: 'Standard workout for this type' }
     ]
@@ -505,38 +778,48 @@
   }
 
   function renderPlan(plan) {
+    cachedPlan = plan
     const container = document.getElementById('planList')
     container.innerHTML = ''
     const completions = window.AppStorage.getCompletions()
     const profile = window.AppStorage.getProfile()
     const isFootball = profile && profile.sport === 'Football'
     const isRunning = profile && profile.sport === 'Running'
-    
+    const isBasketball = profile && profile.sport === 'Basketball'
+
     plan.forEach((item) => {
       const checked = !!completions[item.date]
       const div = document.createElement('div')
-      
+
       if (isFootball) {
         div.className = `card workout-card football-specific ${profile.position.toLowerCase()} ${item.type} ${checked ? 'done' : ''}`
         div.innerHTML = renderFootballWorkout(item, profile.position, checked)
+      } else if (isBasketball) {
+        div.className = `card workout-card basketball-specific ${profile.position.toLowerCase()} ${item.type} ${checked ? 'done' : ''}`
+        div.innerHTML = renderBasketballWorkout(item, profile, checked)
       } else if (isRunning) {
         div.className = `card workout-card running-specific ${item.type} ${checked ? 'done' : ''}`
         div.innerHTML = renderRunningWorkout(item, checked)
       } else {
         div.className = `card workout-card ${checked ? 'done' : ''}`
         div.innerHTML = `
-          <div class=\"card-body d-flex align-items-center justify-content-between\">
+          <div class="card-body d-flex align-items-center justify-content-between">
             <div>
-              <div class=\"fw-semibold\">${item.day} • ${item.date}</div>
-              <div class=\"text-secondary\">${item.workout}</div>
+              <div class="fw-semibold">${item.day} • ${item.date}</div>
+              <div class="text-secondary">${item.workout}</div>
             </div>
-            <div class=\"form-check\">
-              <input class=\"form-check-input\" type=\"checkbox\" ${checked ? 'checked' : ''} data-date=\"${item.date}\" />
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" ${checked ? 'checked' : ''} data-date="${item.date}" />
             </div>
           </div>
         `
       }
-      
+
+      div.setAttribute('data-day', item.day)
+      div.setAttribute('data-date', item.date)
+      div.setAttribute('data-type', item.type)
+      if (item.key) div.setAttribute('data-key', item.key)
+
       container.appendChild(div)
     })
 
@@ -550,19 +833,17 @@
         else card.classList.remove('done')
       }
     })
-    
-    // Add click handlers for detailed day view
+
     container.addEventListener('click', function (e) {
       const workoutCard = e.target.closest('.workout-card')
       if (workoutCard && !e.target.matches('input[type="checkbox"]') && !e.target.matches('button')) {
-        const day = workoutCard.querySelector('h6').textContent.split(' • ')[0]
-        const date = workoutCard.querySelector('h6').textContent.split(' • ')[1]
-        const workout = workoutCard.querySelector('p').textContent
-        const type = workoutCard.classList.contains('strength') ? 'strength' : 
-                    workoutCard.classList.contains('conditioning') ? 'conditioning' :
-                    workoutCard.classList.contains('skill') ? 'skill' : 'rest'
-        
-        showDayDetail(day, date, workout, type, profile)
+        const day = workoutCard.getAttribute('data-day')
+        const date = workoutCard.getAttribute('data-date')
+        const type = workoutCard.getAttribute('data-type')
+        const planItem = cachedPlan.find((p) => p.date === date)
+        const summary = planItem ? planItem.workout : ''
+
+        showDayDetail(day, date, summary, type || '', profile, planItem)
       }
     })
   }
@@ -587,7 +868,7 @@
             renderPlan(planDays)
           }
           const tips = await window.Api.getTips(profile.sport, profile.position)
-          renderEnhancedNutrition(tips, profile.position)
+          renderEnhancedNutrition(tips, profile.position, profile.sport)
         } else {
           const { plan } = window.Onboarding.ensureWeekPlan(profile)
           renderPlan(plan)
@@ -611,7 +892,7 @@
           window.AppStorage.setPlan(weekStart, planDays)
           renderPlan(planDays)
           const tips = await window.Api.getTips(p.sport, p.position)
-          renderEnhancedNutrition(tips, p.position)
+          renderEnhancedNutrition(tips, p.position, p.sport)
         } else {
           const { plan } = window.Onboarding.ensureWeekPlan(p)
           renderPlan(plan)
@@ -747,6 +1028,71 @@
     }
     
     modal.show()
+  }
+
+  function openFuelPlanModal(profile, session, level) {
+    const modalEl = document.getElementById('fuelPlanModal')
+    if (!modalEl || !session) return
+    const modal = new bootstrap.Modal(modalEl)
+    const title = document.getElementById('fuelPlanTitle')
+    const content = document.getElementById('fuelPlanContent')
+
+    const nutrition = session.nutrition?.[level] || {}
+
+    title.textContent = `${session.title || 'Fuel Strategy'} • ${profile.position}`
+    content.innerHTML = `
+      <div class="fuel-plan">
+        <section class="mb-4">
+          <h5 class="fw-semibold">Pre-Workout (2h prior)</h5>
+          <p class="mb-2">${nutrition.pre || 'High-carb meal with lean protein + hydration.'}</p>
+        </section>
+        <section class="mb-4">
+          <h5 class="fw-semibold">During Session</h5>
+          <p class="mb-2">${nutrition.during || 'Water + electrolytes as needed.'}</p>
+        </section>
+        <section class="mb-4">
+          <h5 class="fw-semibold">Post-Workout (30 min)</h5>
+          <p class="mb-2">${nutrition.post || '30g protein + 60-80g carbs within 30 minutes.'}</p>
+        </section>
+        <section class="mb-0">
+          <h5 class="fw-semibold">Evening Recovery</h5>
+          <p class="mb-0">${nutrition.evening || 'Balanced meal with lean protein, complex carbs, antioxidants.'}</p>
+        </section>
+      </div>
+    `
+
+    modal.show()
+  }
+
+  function getBasketballExerciseBreakdown(session, level) {
+    const levelNotes = session?.levelNotes?.[level]
+    const segments = session?.segments || []
+    const finisher = session?.finisher?.[level]
+
+    const breakdown = []
+
+    if (levelNotes) {
+      breakdown.push({
+        name: 'Level Focus',
+        details: levelNotes
+      })
+    }
+
+    segments.forEach((segment, index) => {
+      breakdown.push({
+        name: `Block ${index + 1}`,
+        details: segment
+      })
+    })
+
+    if (finisher) {
+      breakdown.push({
+        name: 'Finisher',
+        details: finisher
+      })
+    }
+
+    return breakdown
   }
 
   // Make the function globally available
